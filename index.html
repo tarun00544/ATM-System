@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATM Machine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .atm-container {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            width: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .atm-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2ecc71, #f39c12, #e74c3c);
+        }
+
+        .screen {
+            background: #000;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            min-height: 320px;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.8);
+            border: 3px solid #34495e;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 49%, rgba(255,255,255,0.03) 50%, transparent 51%);
+            pointer-events: none;
+        }
+
+        .screen-content {
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            text-shadow: 0 0 10px #00ff41;
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            animation: fadeIn 2s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .title {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-shadow: 0 0 15px #3498db;
+        }
+
+        .menu-item {
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background: rgba(52, 152, 219, 0.2);
+            transform: translateX(5px);
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 255, 65, 0.1);
+            border: 2px solid #00ff41;
+            border-radius: 8px;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+            transform: scale(1.02);
+        }
+
+        .input-field::placeholder {
+            color: rgba(0, 255, 65, 0.6);
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .key {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 12px;
+            padding: 18px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 
+                0 5px 15px rgba(52, 152, 219, 0.3),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .key:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 25px rgba(52, 152, 219, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .key:active {
+            transform: translateY(0);
+            box-shadow: 
+                0 3px 10px rgba(52, 152, 219, 0.3),
+                inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .key.enter {
+            background: linear-gradient(145deg, #27ae60, #229954);
+            grid-column: span 2;
+        }
+
+        .key.clear {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+        }
+
+        .key.zero {
+            grid-column: span 2;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+        }
+
+        .transaction-item {
+            background: rgba(0, 255, 65, 0.1);
+            border-left: 3px solid #00ff41;
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .success {
+            color: #27ae60;
+            text-shadow: 0 0 10px #27ae60;
+        }
+
+        .error {
+            color: #e74c3c;
+            text-shadow: 0 0 10px #e74c3c;
+        }
+
+        .card-slot {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            width: 80px;
+            height: 8px;
+            background: linear-gradient(90deg, #2c3e50, #000);
+            border-radius: 4px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+        }
+
+        .cash-slot {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 8px;
+            background: linear-gradient(90deg, #2c3e50, #000);
+            border-radius: 4px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+        }
+
+        .loading {
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .balance-display {
+            font-size: 24px;
+            text-align: center;
+            color: #27ae60;
+            text-shadow: 0 0 15px #27ae60;
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #27ae60;
+            border-radius: 10px;
+            background: rgba(39, 174, 96, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="atm-container">
+        <div class="card-slot"></div>
+        <div class="cash-slot"></div>
+        
+        <div class="screen">
+            <div class="screen-content" id="screenContent">
+                <div class="welcome-screen">
+                    <div class="title">🏦 WELCOME TO ATM SYSTEM 🏦</div>
+                    <div>════════════════════════════════════════</div>
+                    <br>
+                    <div>🔐 Please insert your card and enter PIN</div>
+                    <br>
+                    <div class="input-group">
+                        <input type="password" class="input-field" id="pinInput" placeholder="Enter 4-digit PIN" maxlength="4">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="keypad">
+            <button class="key" onclick="addDigit('1')">1</button>
+            <button class="key" onclick="addDigit('2')">2</button>
+            <button class="key" onclick="addDigit('3')">3</button>
+            <button class="key" onclick="addDigit('4')">4</button>
+            <button class="key" onclick="addDigit('5')">5</button>
+            <button class="key" onclick="addDigit('6')">6</button>
+            <button class="key" onclick="addDigit('7')">7</button>
+            <button class="key" onclick="addDigit('8')">8</button>
+            <button class="key" onclick="addDigit('9')">9</button>
+            <button class="key clear" onclick="clearInput()">CLEAR</button>
+            <button class="key zero" onclick="addDigit('0')">0</button>
+            <button class="key enter" onclick="processInput()">ENTER</button>
+        </div>
+    </div>
+
+    <script>
+        class ATMAccount {
+            constructor(accountNumber, pin, initialBalance) {
+                this.accountNumber = accountNumber;
+                this.pin = pin;
+                this.balance = initialBalance;
+                this.transactionHistory = [];
+                this.dailyWithdrawalLimit = 25000;
+                this.dailyWithdrawnAmount = 0;
+                this.lastWithdrawalDate = '';
+            }
+
+            validatePin(inputPin) {
+                return this.pin === inputPin;
+            }
+
+            withdraw(amount) {
+                const today = new Date().toLocaleDateString();
+                
+                if (today !== this.lastWithdrawalDate) {
+                    this.dailyWithdrawnAmount = 0;
+                    this.lastWithdrawalDate = today;
+                }
+
+                if (amount <= 0) {
+                    return { success: false, message: "❌ Invalid amount. Please enter a positive value." };
+                }
+
+                if (amount > this.balance) {
+                    return { success: false, message: `❌ Insufficient balance. Your current balance is ₹${this.balance}` };
+                }
+
+                if (amount % 100 !== 0) {
+                    return { success: false, message: "❌ Please enter amount in multiples of ₹100." };
+                }
+
+                if (amount > 10000) {
+                    return { success: false, message: "❌ Maximum withdrawal limit per transaction is ₹10,000." };
+                }
+
+                if (this.dailyWithdrawnAmount + amount > this.dailyWithdrawalLimit) {
+                    return { success: false, message: `❌ Daily withdrawal limit exceeded. Limit: ₹${this.dailyWithdrawalLimit}` };
+                }
+
+                this.balance -= amount;
+                this.dailyWithdrawnAmount += amount;
+                this.transactionHistory.push({
+                    type: 'WITHDRAWAL',
+                    amount: amount,
+                    balanceAfter: this.balance,
+                    timestamp: new Date()
+                });
+
+                return { 
+                    success: true, 
+                    message: `✅ Transaction Successful!\n💰 Withdrawn Amount: ₹${amount}\n💳 Remaining Balance: ₹${this.balance}\n📊 Daily Limit Remaining: ₹${this.dailyWithdrawalLimit - this.dailyWithdrawnAmount}` 
+                };
+            }
+
+            deposit(amount) {
+                if (amount <= 0) {
+                    return { success: false, message: "❌ Invalid amount. Please enter a positive value." };
+                }
+
+                if (amount > 50000) {
+                    return { success: false, message: "❌ Maximum deposit limit per transaction is ₹50,000." };
+                }
+
+                this.balance += amount;
+                this.transactionHistory.push({
+                    type: 'DEPOSIT',
+                    amount: amount,
+                    balanceAfter: this.balance,
+                    timestamp: new Date()
+                });
+
+                return { 
+                    success: true, 
+                    message: `✅ Deposit Successful!\n💰 Deposited Amount: ₹${amount}\n💳 Current Balance: ₹${this.balance}` 
+                };
+            }
+
+            changePin(oldPin, newPin) {
+                if (!this.validatePin(oldPin)) {
+                    return { success: false, message: "❌ Incorrect current PIN." };
+                }
+
+                if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+                    return { success: false, message: "❌ PIN must be exactly 4 digits." };
+                }
+
+                if (newPin === oldPin) {
+                    return { success: false, message: "❌ New PIN cannot be same as current PIN." };
+                }
+
+                this.pin = newPin;
+                return { success: true, message: "✅ PIN changed successfully!" };
+            }
+        }
+
+        // Initialize ATM
+        let account = new ATMAccount('1234567890', '1234', 10000);
+        let currentScreen = 'login';
+        let currentInput = '';
+        let pinAttempts = 0;
+        let maxPinAttempts = 3;
+        let pendingOperation = null;
+        let pinChangeStep = 0;
+        let tempPins = {};
+
+        function addDigit(digit) {
+            const pinInput = document.getElementById('pinInput');
+            if (pinInput && pinInput.style.display !== 'none') {
+                if (pinInput.value.length < 4) {
+                    pinInput.value += digit;
+                }
+            } else {
+                currentInput += digit;
+                updateInputDisplay();
+            }
+        }
+
+        function clearInput() {
+            const pinInput = document.getElementById('pinInput');
+            if (pinInput && pinInput.style.display !== 'none') {
+                pinInput.value = '';
+            } else {
+                currentInput = '';
+                updateInputDisplay();
+            }
+        }
+
+        function updateInputDisplay() {
+            const inputDisplay = document.getElementById('inputDisplay');
+            if (inputDisplay) {
+                inputDisplay.textContent = currentInput || '0';
+            }
+        }
+
+        function processInput() {
+            if (currentScreen === 'login') {
+                authenticateUser();
+            } else if (currentScreen === 'menu') {
+                handleMenuSelection();
+            } else if (currentScreen === 'withdraw') {
+                processWithdrawal();
+            } else if (currentScreen === 'deposit') {
+                processDeposit();
+            } else if (currentScreen === 'changePin') {
+                processChangePIN();
+            }
+        }
+
+        function authenticateUser() {
+            const pinInput = document.getElementById('pinInput');
+            const inputPin = pinInput.value;
+
+            if (inputPin.length !== 4) {
+                showError('Please enter a 4-digit PIN');
+                return;
+            }
+
+            if (account.validatePin(inputPin)) {
+                pinAttempts = 0;
+                currentScreen = 'menu';
+                showMainMenu();
+            } else {
+                pinAttempts++;
+                const remaining = maxPinAttempts - pinAttempts;
+                
+                if (remaining > 0) {
+                    showError(`❌ Incorrect PIN. ${remaining} attempts remaining.`);
+                    pinInput.value = '';
+                } else {
+                    showScreen(`
+                        <div class="error">
+                            🚫 ACCOUNT BLOCKED<br><br>
+                            Account blocked due to multiple incorrect PIN attempts.<br>
+                            Please contact your bank for assistance.
+                        </div>
+                    `);
+                }
+            }
+        }
+
+        function showMainMenu() {
+            showScreen(`
+                <div class="title">🏧 ATM MAIN MENU</div>
+                <div>════════════════════════════════════════</div><br>
+                <div class="menu-item" onclick="selectOption(1)">1. 💰 Withdraw Money</div>
+                <div class="menu-item" onclick="selectOption(2)">2. 💳 Check Balance</div>
+                <div class="menu-item" onclick="selectOption(3)">3. 📥 Deposit Money</div>
+                <div class="menu-item" onclick="selectOption(4)">4. 📋 Transaction History</div>
+                <div class="menu-item" onclick="selectOption(5)">5. 🔒 Change PIN</div>
+                <div class="menu-item" onclick="selectOption(6)">6. 🚪 Exit</div><br>
+                <div>👆 Select an option (1-6)</div>
+            `);
+        }
+
+        function selectOption(option) {
+            switch(option) {
+                case 1:
+                    showWithdrawScreen();
+                    break;
+                case 2:
+                    showBalance();
+                    break;
+                case 3:
+                    showDepositScreen();
+                    break;
+                case 4:
+                    showTransactionHistory();
+                    break;
+                case 5:
+                    showChangePINScreen();
+                    break;
+                case 6:
+                    showExitScreen();
+                    break;
+            }
+        }
+
+        function showWithdrawScreen() {
+            currentScreen = 'withdraw';
+            currentInput = '';
+            showScreen(`
+                <div class="title">💰 WITHDRAW MONEY</div>
+                <div>────────────────────</div><br>
+                <div>💡 Notes available: ₹100, ₹200, ₹500, ₹2000</div>
+                <div>💡 Enter amount in multiples of ₹100</div>
+                <div>💡 Maximum: ₹10,000 per transaction</div><br>
+                <div>💰 Enter withdrawal amount: ₹<span id="inputDisplay">0</span></div><br>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="showMainMenu()">← Back</button>
+                </div>
+            `);
+        }
+
+        function processWithdrawal() {
+            const amount = parseFloat(currentInput);
+            if (isNaN(amount) || amount <= 0) {
+                showError('Please enter a valid amount');
+                return;
+            }
+
+            const result = account.withdraw(amount);
+            if (result.success) {
+                showSuccess(result.message);
+                setTimeout(() => showMainMenu(), 3000);
+            } else {
+                showError(result.message);
+                setTimeout(() => showWithdrawScreen(), 2000);
+            }
+        }
+
+        function showDepositScreen() {
+            currentScreen = 'deposit';
+            currentInput = '';
+            showScreen(`
+                <div class="title">📥 DEPOSIT MONEY</div>
+                <div>────────────────────</div><br>
+                <div>💡 Maximum: ₹50,000 per transaction</div><br>
+                <div>💰 Enter deposit amount: ₹<span id="inputDisplay">0</span></div><br>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="showMainMenu()">← Back</button>
+                </div>
+            `);
+        }
+
+        function processDeposit() {
+            const amount = parseFloat(currentInput);
+            if (isNaN(amount) || amount <= 0) {
+                showError('Please enter a valid amount');
+                return;
+            }
+
+            const result = account.deposit(amount);
+            if (result.success) {
+                showSuccess(result.message);
+                setTimeout(() => showMainMenu(), 3000);
+            } else {
+                showError(result.message);
+                setTimeout(() => showDepositScreen(), 2000);
+            }
+        }
+
+        function showBalance() {
+            showScreen(`
+                <div class="title">💳 BALANCE INQUIRY</div>
+                <div>────────────────────</div><br>
+                <div>Account Number: ${account.accountNumber}</div><br>
+                <div class="balance-display">Current Balance: ₹${account.balance}</div><br>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="showMainMenu()">← Back</button>
+                </div>
+            `);
+        }
+
+        function showTransactionHistory() {
+            let historyHtml = `
+                <div class="title">📋 TRANSACTION HISTORY</div>
+                <div>══════════════════════════════════════════════</div><br>
+            `;
+
+            if (account.transactionHistory.length === 0) {
+                historyHtml += '<div>📋 No transactions found.</div>';
+            } else {
+                const recentTransactions = account.transactionHistory.slice(-5);
+                recentTransactions.forEach(transaction => {
+                    const date = transaction.timestamp.toLocaleString();
+                    historyHtml += `
+                        <div class="transaction-item">
+                            ${transaction.type} | ₹${transaction.amount} | Balance: ₹${transaction.balanceAfter}<br>
+                            ${date}
+                        </div>
+                    `;
+                });
+            }
+
+            historyHtml += `<br><div class="action-buttons">
+                <button class="action-btn" onclick="showMainMenu()">← Back</button>
+            </div>`;
+
+            showScreen(historyHtml);
+        }
+
+        function showChangePINScreen() {
+            currentScreen = 'changePin';
+            pinChangeStep = 1;
+            currentInput = '';
+            showScreen(`
+                <div class="title">🔒 CHANGE PIN</div>
+                <div>─────────────────</div><br>
+                <div>🔐 Enter current PIN: <span id="inputDisplay">****</span></div><br>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="showMainMenu()">← Back</button>
+                </div>
+            `);
+        }
+
+        function processChangePIN() {
+            if (pinChangeStep === 1) {
+                tempPins.oldPin = currentInput;
+                pinChangeStep = 2;
+                currentInput = '';
+                showScreen(`
+                    <div class="title">🔒 CHANGE PIN</div>
+                    <div>─────────────────</div><br>
+                    <div>🔐 Enter new PIN (4 digits): <span id="inputDisplay">****</span></div><br>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="showMainMenu()">← Back</button>
+                    </div>
+                `);
+            } else if (pinChangeStep === 2) {
+                tempPins.newPin = currentInput;
+                pinChangeStep = 3;
+                currentInput = '';
+                showScreen(`
+                    <div class="title">🔒 CHANGE PIN</div>
+                    <div>─────────────────</div><br>
+                    <div>🔐 Confirm new PIN: <span id="inputDisplay">****</span></div><br>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="showMainMenu()">← Back</button>
+                    </div>
+                `);
+            } else if (pinChangeStep === 3) {
+                if (currentInput !== tempPins.newPin) {
+                    showError('❌ PIN confirmation does not match.');
+                    setTimeout(() => showChangePINScreen(), 2000);
+                    return;
+                }
+
+                const result = account.changePin(tempPins.oldPin, tempPins.newPin);
+                if (result.success) {
+                    showSuccess(result.message);
+                    setTimeout(() => showMainMenu(), 3000);
+                } else {
+                    showError(result.message);
+                    setTimeout(() => showChangePINScreen(), 2000);
+                }
+                
+                tempPins = {};
+                pinChangeStep = 0;
+            }
+        }
+
+        function showExitScreen() {
+            showScreen(`
+                <div class="title success">🙏 Thank you for using ATM System!</div><br>
+                <div class="success">💳 Please collect your card.</div><br>
+                <div class="loading">Processing...</div>
+            `);
+            
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        }
+
+        function showScreen(content) {
+            document.getElementById('screenContent').innerHTML = content;
+        }
+
+        function showError(message) {
+            showScreen(`<div class="error">${message}</div>`);
+        }
+
+        function showSuccess(message) {
+            showScreen(`<div class="success">${message}</div>`);
+        }
+
+        // Initialize the ATM
+        document.addEventListener('DOMContentLoaded', function() {
+            const pinInput = document.getElementById('pinInput');
+            pinInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    authenticateUser();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
